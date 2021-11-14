@@ -1,0 +1,71 @@
+---
+title: "Write a function"
+author: "Ke Xu"
+date: "11/14/2021"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rvest)
+
+set.seed(1)
+```
+
+## Z scores
+
+```{r}
+x_vec = rnorm(25, mean = 5, sd = 3)
+
+(x_vec - mean(x_vec)) / sd(x_vec)
+
+# If I want to repeat that function:
+z_scores = function(x) {
+  
+  if (!is.numeric(x)) {
+    stop("Argument x should be numeric")
+  } 
+  else if (length(x) == 1) {
+    stop("Z scores cannot be computed for length 1 vectors")
+  }
+  
+  z = (x - mean(x)) / sd(x)
+  return(z)
+  
+}
+z_scores(x = x_vec) # z_scores(x_vec)
+
+y_vec = rnorm(40, mean = 12, sd = .3)
+
+z_scores(x = y_vec)
+```
+
+How great it is?
+```{r, error=TRUE}
+z_scores(3)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
