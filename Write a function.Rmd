@@ -91,10 +91,10 @@ sim_mean_sd(30,4,3)
 ```
 
 
-## Ne
+## Napoleon
 
 ```{r}
-read_page_reviews <- function(url) {
+read_page_reviews = function(url) {
   
   html = read_html(url)
   
@@ -139,6 +139,138 @@ dynamite_reviews
 ```
 
 
+# Class 2
+
+## Lists
+
+```{r}
+l = 
+  list(
+  vec_numeric = 5:8,
+  vec_logical = c(TRUE, FALSE),
+  summary = summary(rnorm(1000, mean = 5, sd = 3))
+)
+
+l[[1]] # see the first line of the list
+l[["summary"]] # see "summary" line (line 3)
+l$summary # the same as [[]]
+```
+
+
+## List of normals
+
+```{r}
+list_norms = 
+  list(
+    a = rnorm(20, 3, 1),
+    b = rnorm(20, 0, 5),
+    c = rnorm(20, 10, .2),
+    d = rnorm(20, -3, 1)
+  )
+
+mean_and_sd(list_norms[[1]]) # use the function we previously make
+```
+
+
+## For loop
+
+```{r}
+output = vector("list", length = 4) # set up an empty list
+
+output[[1]] = mean_and_sd(list_norms[[1]])
+
+for (i in 1:4) {
+  output[[i]] = mean_and_sd(list_norms[[i]])
+}
+```
+
+Let's use map instead...
+
+```{r}
+map(list_norms, mean_and_sd)
+
+map_output = map(list_norms, median) # you can put "make sense" object like median 
+map(list_norms, IQR)
+map(list_norms, summary)
+
+map_output[[1]]
+```
+
+## List columns
+
+```{r}
+listcol_df = 
+  tibble(
+    name = c("a", "b", "c", "d"),
+    samp = list_norms
+  )
+
+listcol_df %>% pull(name)
+
+listcol_df$samp[[1]]
+
+mean_and_sd(listcol_df$samp[[1]])
+
+map(listcol_df$samp, mean_and_sd) # use map to calculate all values in 'samp'
+```
+
+
+## Nested data
+
+```{r}
+# Input data
+
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728", "USC00519397", "USS0023B17S"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2017-01-01",
+    date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(
+      id, 
+      USW00094728 = "CentralPark_NY", 
+      USC00519397 = "Waikiki_HA",
+      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+```
+
+Nest data within location
+```{r}
+weather_nested = nest(weather_df, data = date:tmin) # nest all data 
+
+weather_nested %>% 
+  filter(name == "CentralPark_NY") %>% 
+  pull(data)
+
+# unnest 
+unnest(weather_nested, data)
+# we can also pipe:
+weather_nested %>% 
+  unnest(data)
+```
+
+## Linear regression
+
+```{r}
+ lm(tmax ~ tmin, data = weather_nested$data[[1]])
+
+# a function
+weather_lm = function(df) {
+  lm(tmax ~ tmin, data = df)
+}
+
+weather_lm(weather_nest$data[[1]])
+```
+
+```{r}
+map(weather_nested$data, weather_lm)
+
+weather_df %>% 
+  mutate(lm_results = map(data, weather_lm))
+```
 
 
 
